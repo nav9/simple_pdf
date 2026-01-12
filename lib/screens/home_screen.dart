@@ -3,6 +3,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../utils/constants.dart';
 import '../utils/permissions.dart';
+import '../services/security_service.dart';
+import '../screens/security_analysis_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -40,13 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (result != null && result.files.single.path != null) {
       final filePath = result.files.single.path!;
-      if (mounted) {
-        Navigator.pushNamed(
-          context,
-          '/pdf_viewer',
-          arguments: {'filePath': filePath},
-        );
-      }
+      await _openPdfWithSecurityCheck(filePath: filePath);
     }
   }
 
@@ -69,15 +65,11 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final url = _urlController.text.trim();
               if (url.isNotEmpty) {
                 Navigator.pop(context);
-                Navigator.pushNamed(
-                  context,
-                  '/pdf_viewer',
-                  arguments: {'fileUrl': url},
-                );
+                await _openPdfWithSecurityCheck(fileUrl: url);
               }
             },
             child: const Text('Load'),
@@ -85,6 +77,61 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _openPdfWithSecurityCheck({String? filePath, String? fileUrl}) async {
+    // Check if auto security scan is enabled
+    final settingsBox = Hive.box(Constants.settingsBox);
+    final autoScan = settingsBox.get(Constants.autoSecurityScanKey, defaultValue: true);
+
+    if (autoScan && filePath != null) {
+      // Show loading
+      if (mounted) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      }
+
+      // Perform security analysis
+      final securityService = SecurityService();
+      final analysisResult = await securityService.analyzePdf(filePath);
+
+      if (mounted) {
+        Navigator.pop(context); // Close loading dialog
+
+        if (analysisResult.hasThreats) {
+          // Show security analysis dialog
+          final proceed = await showDialog<bool>(
+            context: context,
+            builder: (context) => SecurityAnalysisScreen(
+              result: analysisResult,
+              onCancel: () => Navigator.pop(context, false),
+              onProceed: () => Navigator.pop(context, true),
+            ),
+          );
+
+          if (proceed != true) {
+            return; // User cancelled
+          }
+        }
+      }
+    }
+
+    // Open PDF
+    if (mounted) {
+      Navigator.pushNamed(
+        context,
+        '/pdf_viewer',
+        arguments: {
+          'filePath': filePath,
+          'fileUrl': fileUrl,
+        },
+      );
+    }
   }
 
   @override
