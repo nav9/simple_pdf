@@ -30,46 +30,22 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
-  # PDF Viewing & Rendering
-  pdfrx: ^1.0.0
-  
-  # PDF Manipulation & Creation
-  syncfusion_flutter_pdf: ^27.1.48
-  pdf_manipulator: ^0.5.9
-  printing: ^5.13.4
-  
-  # Database
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
-  
-  # File Handling
-  file_picker: ^8.1.6
+  file_picker: ^10.3.8
+  http: ^1.6.0
   path_provider: ^2.1.5
-  permission_handler: ^11.3.1
-  
-  # HTTP & Networking
-  dio: ^5.7.0
-  
-  # UI Components
-  flutter_speed_dial: ^7.0.0
-  photo_view: ^0.15.0
-  
-  # Utilities
-  intl: ^0.19.0
-  package_info_plus: ^8.1.0
-  url_launcher: ^6.3.1
-  uuid: ^4.5.1
-  cupertino_icons: ^1.0.8
+  open_filex: ^4.7.0
+  syncfusion_flutter_pdfviewer: ^32.1.23
+  syncfusion_flutter_pdf: ^32.1.23
+  permission_handler: ^12.0.1
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   
-  flutter_lints: ^5.0.0
-  flutter_launcher_icons: ^0.14.1
-  mockito: ^5.4.4
-  build_runner: ^2.4.13
+dependency_overrides:
+  meta: ^1.11.0
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
