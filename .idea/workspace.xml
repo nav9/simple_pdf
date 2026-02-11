@@ -5,10 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f7e28172-c02c-4bc7-bdde-826b4d7eb878" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_SDK.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/android/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/simple_pdf.iml" beforeDir="false" afterPath="$PROJECT_DIR$/simple_pdf.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/pdf_split_merge_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/pdf_split_merge_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/services/file_saver.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/services/file_saver.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +61,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "androidOnly",
     "io.flutter.reload.alreadyRun": "true",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/home/nav/virtualbox/shared/code/simple_pdf",

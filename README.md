@@ -247,3 +247,6 @@ flutter pub run build_runner build --delete-conflicting-outputs
 Current version: 1.0.0
 
 For detailed version history, see the About screen in the app.
+
+# TODO
+* register simple pdf as default pdf
