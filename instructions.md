@@ -7,6 +7,8 @@
 6. The app should manage memory efficiently. If a PDF is too large compared to the amount of available memory, the app should load and unload pages from memory depending on which page the user is currently viewing. If the user suddenly scrolls and there is no time to load pages, the page numbers can be shown in the middle of the screen as the pages scroll by, and when the user stops scrolling, the actual page content can be loaded and shown. If the user is at a certain page, consider pre-loading the next page if there is sufficient memory.
 7. For the highlights and themes, use blue shades.
 8. Ensure that the database files and lock files are created in a `simple_pdf_files` folder in Linux so that it does not conflict with other files and folders.
+9. For any files in the database, provide an option to run another scan for malware on it.
+10. In Linux, the user should be allowed to use the arrow keys and pg up and pg dn keys to scroll up or down while viewing the PDF. Also provide all the usual shortcuts like Ctrl+mouseScroll to zoom in or out.
 
 # Main page
 * Provide a nav bar at the top of the page. 
@@ -41,6 +43,7 @@
 * Provide an option to view and delete the bookmarks of any file.
 * Provide an option to toggle whether the app scans the PDF for malware before opening or does not perform the scan.
 * Provide an option to make the app load the entire PDF or just load only the page that needs to be shown, to save on memory.
+* Provide an option to adjust the scroll speed.
 
 # Trash page
 * Provide a nav bar with options for select all, select none (if any are selected), delete permanently and restore. 
