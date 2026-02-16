@@ -513,16 +513,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     );
                   }).toList(),
                 ),
-           if (_isFullscreen)
-             Positioned(
-               top: 16,
-               right: 16,
-               child: FloatingActionButton(
-                 mini: true,
-                 child: const Icon(Icons.fullscreen_exit),
-                 onPressed: _toggleFullscreen,
-               ),
-             ),
+
         ],
       ),
     );
