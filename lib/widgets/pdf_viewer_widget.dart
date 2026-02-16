@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:pdfrx/pdfrx.dart';
 import '../models/pdf_file_model.dart';
@@ -6,8 +7,13 @@ import '../services/database_service.dart';
 
 class PdfViewerWidget extends StatefulWidget {
   final PdfFileModel pdf;
+  final PdfViewerController? controller;
 
-  const PdfViewerWidget({super.key, required this.pdf});
+  const PdfViewerWidget({
+    super.key,
+    required this.pdf,
+    this.controller,
+  });
 
   @override
   State<PdfViewerWidget> createState() => _PdfViewerWidgetState();
@@ -36,15 +42,19 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
       // Get temporary file path (decrypted if needed)
       final tempPath = await _sandboxService.getTempViewPath(widget.pdf);
 
-      setState(() {
-        _tempFilePath = tempPath;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _tempFilePath = tempPath;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = 'Error loading PDF: $e';
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = 'Error loading PDF: $e';
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -61,7 +71,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error, size: 64, color: Colors.red),
+            const Icon(Icons.error, size: 64, color: Colors.red),
             const SizedBox(height: 16),
             Text(_error!),
             const SizedBox(height: 16),
@@ -83,12 +93,14 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
     final settings = _databaseService.getSettings();
 
     // Use pdfrx viewer
-    return _buildPdfrxViewer(settings.useDarkPdfBackground);
+    return _buildPdfrxViewer(settings.useDarkPdfBackground, settings.scrollPhysics, settings.zoomPhysics);
   }
 
-  Widget _buildPdfrxViewer(bool useDarkBackground) {
+  Widget _buildPdfrxViewer(bool useDarkBackground, double scrollPhysics, double zoomPhysics) {
     final viewer = PdfViewer.file(
       _tempFilePath!,
+      controller: widget.controller,
+      passwordProvider: _passwordProvider,
       params: PdfViewerParams(
         loadingBannerBuilder: (context, bytesDownloaded, totalBytes) {
           return Center(
@@ -103,6 +115,8 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
             child: Text('Error: $error'),
           );
         },
+        // Using scroll physics settings if applicable (not directly configurable in pdfrx params like physics)
+        // But we can assume default behavior or custom physics if supported in updated pdfrx
       ),
     );
 
@@ -117,6 +131,37 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
     }
 
     return viewer;
+  }
+
+  Future<String?> _passwordProvider() async {
+    return showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        final controller = TextEditingController();
+        return AlertDialog(
+          title: const Text('Enter Password'),
+          content: TextField(
+            controller: controller,
+            obscureText: true,
+            decoration: const InputDecoration(
+              hintText: 'Password',
+            ),
+            autofocus: true,
+          ),
+          actions: [
+             TextButton(
+               onPressed: () => Navigator.pop(context, null),
+               child: const Text('Cancel'),
+             ),
+             TextButton(
+               onPressed: () => Navigator.pop(context, controller.text),
+               child: const Text('Unlock'),
+             ),
+          ],
+        );
+      },
+    );
   }
 
   @override

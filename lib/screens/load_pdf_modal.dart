@@ -138,10 +138,68 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
     }
   }
 
+
   void _selectPdfFromDatabase(PdfFileModel pdf) {
     if (mounted) {
       Navigator.pop(context, pdf);
     }
+  }
+
+  Future<void> _renamePdf(PdfFileModel pdf) async {
+    final controller = TextEditingController(text: pdf.name);
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Rename PDF'),
+        content: TextField(controller: controller),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, controller.text),
+            child: const Text('Rename'),
+          ),
+        ],
+      ),
+    );
+
+    if (newName != null && newName.isNotEmpty && newName != pdf.name) {
+      pdf.name = newName;
+      await _databaseService.updatePdf(pdf);
+      setState(() {});
+    }
+  }
+
+  Future<void> _deletePdf(PdfFileModel pdf) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete PDF'),
+        content: Text('Are you sure you want to delete "${pdf.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await _databaseService.deletePdf(pdf.id);
+      setState(() {});
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
   Widget _buildDatabaseTab() {
@@ -160,8 +218,39 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
         return ListTile(
           leading: const Icon(Icons.picture_as_pdf),
           title: Text(pdf.name),
-          subtitle: Text('${(pdf.fileSize / 1024 / 1024).toStringAsFixed(2)} MB'),
+          subtitle: Text('${(pdf.fileSize / 1024 / 1024).toStringAsFixed(2)} MB • ${_formatDate(pdf.dateAdded)}'),
           onTap: () => _selectPdfFromDatabase(pdf),
+          trailing: PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'rename') {
+                _renamePdf(pdf);
+              } else if (value == 'delete') {
+                _deletePdf(pdf);
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'rename',
+                child: Row(
+                  children: [
+                    Icon(Icons.edit, color: Colors.blue),
+                    SizedBox(width: 8),
+                    Text('Rename'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('Delete'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

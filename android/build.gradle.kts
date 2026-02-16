@@ -18,6 +18,7 @@ subprojects {
     afterEvaluate {
         if (project.plugins.hasPlugin("com.android.library") || project.plugins.hasPlugin("com.android.application")) {
             val android = project.extensions.getByName("android") as com.android.build.gradle.BaseExtension
+            android.compileSdkVersion(36)
             if (android.namespace == null) {
                 val namespace = when (project.name) {
                     "pdf_manipulator" -> "com.deepanshuchaudhary.pdf_manipulator"

@@ -28,13 +28,14 @@ class SettingsModelAdapter extends TypeAdapter<SettingsModel> {
       useDarkPdfBackground: fields[8] as bool,
       scrollPhysics: fields[9] as double,
       zoomPhysics: fields[10] as double,
+      dontShowDefaultAppPrompt: fields[11] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, SettingsModel obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(12)
       ..writeByte(0)
       ..write(obj.pdfViewerPackage)
       ..writeByte(1)
@@ -56,7 +57,9 @@ class SettingsModelAdapter extends TypeAdapter<SettingsModel> {
       ..writeByte(9)
       ..write(obj.scrollPhysics)
       ..writeByte(10)
-      ..write(obj.zoomPhysics);
+      ..write(obj.zoomPhysics)
+      ..writeByte(11)
+      ..write(obj.dontShowDefaultAppPrompt);
   }
 
   @override

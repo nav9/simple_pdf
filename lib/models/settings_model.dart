@@ -35,7 +35,10 @@ class SettingsModel extends HiveObject {
   double scrollPhysics; // 0.0 to 1.0 for scroll sensitivity
 
   @HiveField(10)
-  double zoomPhysics; // 0.0 to 1.0 for zoom sensitivity
+  double zoomPhysics;
+
+  @HiveField(11)
+  bool dontShowDefaultAppPrompt;
 
   SettingsModel({
     this.pdfViewerPackage = 'pdfrx',
@@ -49,6 +52,7 @@ class SettingsModel extends HiveObject {
     this.useDarkPdfBackground = false,
     this.scrollPhysics = 0.5,
     this.zoomPhysics = 0.5,
+    this.dontShowDefaultAppPrompt = false,
   });
 
   Map<String, dynamic> toJson() => {

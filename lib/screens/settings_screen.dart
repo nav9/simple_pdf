@@ -4,6 +4,7 @@ import '../services/encryption_service.dart';
 import '../models/settings_model.dart';
 import '../utils/platform_utils.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -262,6 +263,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 fontSize: 18,
               ),
             ),
+          ),
+          ListTile(
+            title: const Text('Set as Default PDF App'),
+            subtitle: const Text('Open system settings to manage defaults'),
+            trailing: const Icon(Icons.open_in_new),
+            onTap: () async {
+              // Using permission_handler's openAppSettings
+              await openAppSettings();
+            },
           ),
           if (availableViewers.length > 1)
             ListTile(

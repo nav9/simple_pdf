@@ -9,6 +9,7 @@
 8. Ensure that the database files and lock files are created in a `simple_pdf_files` folder in Linux so that it does not conflict with other files and folders.
 9. For any files in the database, provide an option to run another scan for malware on it.
 10. In Linux, the user should be allowed to use the arrow keys and pg up and pg dn keys to scroll up or down while viewing the PDF. Also provide all the usual shortcuts like Ctrl+mouseScroll to zoom in or out.
+11. If the PDF is protected by a password, show a dialog box for the user to type the password (or cancel) and show an error message if the password is wrong, and immediately show the dialog box again for typing the password (with a cancel button).
 
 # Main page
 * Provide a nav bar at the top of the page. 
@@ -16,16 +17,15 @@
 * At the right of the Nav bar is an overflow menu. 
 * The nav bar has an icon button to "Load" which opens a modal that allows browsing for a PDF file from the device (a list of recently used folders are shown along with a Browse button to search the filesystem). The modal also provides a URL for downloading a PDF file from the internet and another option for opening a PDF file from a list of PDF files in the app's database.
 * The overflow menu has an option to move a PDF file from the app's database to Trash.
-* The overflow menu should have an option to save a loaded PDF to storage.
+* The overflow menu should have an option to save a loaded PDF to storage and when selected, it should show a modal to save the file, by offering an option to select the folder and name of the file and an option to create a new folder.
 * Ensure that the overflow menu has a way for the user to switch the white PDF background to a darker color (Hint: See if using `ColorFiltered(colorFilter: ColorFilter.mode(Colors.white, darkMode ? BlendMode.difference : BlendMode.dst), child: PdfViewer.file(filePath, ...),),` will help.
 * When the PDF is loading, use the `loadingBannerBuilder: (context, bytesDownloaded, totalBytes) {return Center(child: CircularProgressIndicator(value: totalBytes != null ? bytesDownloaded / totalBytes : null, backgroundColor: Colors.grey,),);}` to display a loading banner where possible.
-* The overflow menu should have a search option to search for text and highlight it in the pdf and to find next and prev. Consider adding more search features that may be useful.
-* The overflow menu should have an option to extract text or images from the PDF and save it to disk as a txt file or png file or svg file, depending on what kind of content it is.
-* Easy zooming should be available. 
+* The overflow menu should have a search option to search for text and highlight it in the pdf and to find next and prev. Consider adding more search features that may be useful. When the user clicks the next or prev button, the app should scroll to the next or prev occurrence of the text.
+* The overflow menu should have an option to extract text or images from the PDF and save it to disk as a txt file or png file or svg file, depending on what kind of content it is. Implement a function to extract and save the text or images to disk.
+* Easy zooming should be available to zoom in and zoom out and to view as best fit and to view as original size. Provide an option to view the PDF in fullscreen mode and to be able to switch back.
 * Provide an option to set bookmarks, name the bookmarks and edit/delete the names and to be able to jump to bookmarks. The bookmarks can be stored in the database for PDF files that are in the database. 
 * Before opening any PDF, the app should perform an offline scan of the PDF for common malware or scripts that it may contain. The user should be shown a modal displaying the progress of the scan, and at the end of the scan the user should be shown a coloured categorized list of threats detected, the specifics of what the threat is in the PDF, and a simple explanation of how such a threat could be harmful and whether the PDF can be opened safely despite the threat being present, and what the user could do to open the PDF safely. (If possible, offer to open the PDF in a safe mode that prevents the PDF from having access to the internet and prevents it from having access to the filesystem or memory). This is a high priority feature.
 * Provide an option to allow the user to jump to a specific page of the PDF.
-* Provide an option to view the PDF in fullscreen mode and to be able to switch back.
 * Provide an option to open a modal containing checkboxes for each of the PDF pages, thumbnails of each page and allowing the user to select one or more pages (along with options of "Select all/none"). The user should be allowed to merge the selected pages and save it as a new PDF in the database (give it a default name based on the earlier name plus the date and time of merging).
 * An option to store the files in encrypted form in the database and to be able to export or import encrypted PDF's of this app.
 * An option to rename the PDF files stored in the database.
@@ -39,11 +39,10 @@
 * Depending on which operating systems the flutter packages work on, provide a dropdown that allows the user to choose whether pdfrx or easy_pdf_viewer is used for viewing or editing PDF files. 
 * Provide an option to change the theme from dark to light or system theme. Dark theme is the default.
 * Provide a dropdown for the user to choose various parameters available in flutter_tts.
-* Provide an option to customize the scroll and zoom physics.
+* Provide an option to customize the scroll and zoom physics (which means the speed/granularity of scroll and zoom).
 * Provide an option to view and delete the bookmarks of any file.
 * Provide an option to toggle whether the app scans the PDF for malware before opening or does not perform the scan.
 * Provide an option to make the app load the entire PDF or just load only the page that needs to be shown, to save on memory.
-* Provide an option to adjust the scroll speed.
 
 # Trash page
 * Provide a nav bar with options for select all, select none (if any are selected), delete permanently and restore. 
