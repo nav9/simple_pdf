@@ -152,8 +152,11 @@ class SecurityAnalysisScreen extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 4),
                                       ...threat.details.map((detail) => Padding(
-                                            padding: const EdgeInsets.only(left: 8, top: 2),
-                                            child: Text('• $detail'),
+                                            padding: const EdgeInsets.only(left: 8, top: 4),
+                                            child: SelectableText(
+                                              '• $detail',
+                                              style: const TextStyle(fontFamily: 'Courier'), // Monospace for code/urls
+                                            ),
                                           )),
                                     ],
                                   ],

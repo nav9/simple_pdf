@@ -180,13 +180,11 @@ class PdfSecurityScanner {
     final uriPattern = RegExp(r'/URI\s*\(([^)]+)\)');
     final matches = uriPattern.allMatches(content);
     
-    for (var match in matches.take(5)) {
-      // Limit to first 5 URLs
-      details.add('URL: ${match.group(1)}');
-    }
-    
-    if (matches.length > 5) {
-      details.add('... and ${matches.length - 5} more URLs');
+    for (var match in matches) {
+      final url = match.group(1);
+      if (url != null) {
+        details.add('URL: $url');
+      }
     }
     
     return details.isEmpty ? ['PDF contains /URI actions'] : details;

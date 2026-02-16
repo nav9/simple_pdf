@@ -21,6 +21,7 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
   final _urlController = TextEditingController();
   
   int _selectedTab = 0; // 0: Database, 1: Browse, 2: URL
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -36,11 +37,22 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
       );
 
       if (result != null && result.files.single.path != null) {
+        setState(() {
+          _isLoading = true;
+        });
         final filePath = result.files.single.path!;
         await _processPdfFile(filePath, result.files.single.name);
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error picking file: $e')),
         );
@@ -111,12 +123,19 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
             ],
             selected: {_selectedTab},
             onSelectionChanged: (Set<int> newSelection) {
-              setState(() {
-                _selectedTab = newSelection.first;
-              });
+              if (!_isLoading) {
+                 setState(() {
+                   _selectedTab = newSelection.first;
+                 });
+              }
             },
           ),
           const SizedBox(height: 16),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.only(bottom: 16.0),
+              child: LinearProgressIndicator(),
+            ),
           Expanded(
             child: _buildTabContent(),
           ),

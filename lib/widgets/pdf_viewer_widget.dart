@@ -223,34 +223,46 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
         },
         child: Stack(
           children: [
-            PdfViewer.file(
-              _tempFilePath!,
-              controller: _internalController,
-              passwordProvider: _passwordProvider,
-              params: PdfViewerParams(
-                onViewerReady: (document, controller) => _onDataLoaded(document),
-                onPageChanged: (page) {
-                  if (page != null) _onPageChanged(page);
-                },
-                errorBannerBuilder: (context, error, stackTrace, documentRef) {
-                  return Center(
-                    child: Text('Error: $error'),
-                  );
-                },
-              ),
-            ),
-            if (useDarkBackground)
-               Positioned.fill(
-                 child: IgnorePointer(
-                   child: ColorFiltered(
-                     colorFilter: const ColorFilter.mode(
-                       Colors.white,
-                       BlendMode.difference,
-                     ),
-                     child: Container(color: Colors.transparent), 
-                   ),
-                 ),
-               ),
+            useDarkBackground 
+                ? ColorFiltered(
+                    colorFilter: const ColorFilter.mode(
+                      Colors.white,
+                      BlendMode.difference,
+                    ),
+                    child: PdfViewer.file(
+                      _tempFilePath!,
+                      controller: _internalController,
+                      passwordProvider: _passwordProvider,
+                      params: PdfViewerParams(
+                        onViewerReady: (document, controller) => _onDataLoaded(document),
+                        onPageChanged: (page) {
+                          if (page != null) _onPageChanged(page);
+                        },
+                        errorBannerBuilder: (context, error, stackTrace, documentRef) {
+                          return Center(
+                            child: Text('Error: $error'),
+                          );
+                        },
+                      ),
+                    ),
+                  )
+                : PdfViewer.file(
+                    _tempFilePath!,
+                    controller: _internalController,
+                    passwordProvider: _passwordProvider,
+                    params: PdfViewerParams(
+                      onViewerReady: (document, controller) => _onDataLoaded(document),
+                      onPageChanged: (page) {
+                        if (page != null) _onPageChanged(page);
+                      },
+                      errorBannerBuilder: (context, error, stackTrace, documentRef) {
+                        return Center(
+                          child: Text('Error: $error'),
+                        );
+                      },
+                    ),
+                  ),
+
                
             // Controls Overlay
             if (_showControls && _isFullScreen()) ...[

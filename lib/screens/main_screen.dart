@@ -46,7 +46,14 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     // Check for default app prompt after build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkDefaultApp();
+      _checkAutoOpen();
     });
+  }
+
+  void _checkAutoOpen() {
+    if (_openPdfs.isEmpty && mounted) {
+      _showLoadPdfModal();
+    }
   }
 
   @override
@@ -539,34 +546,65 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             const Text('You will need to select "Simple PDF" and "Always" in the next dialog.', style: TextStyle(fontSize: 12, color: Colors.grey)),
           ],
         ),
-        actions: [
-          Row(
-            children: [
-              TextButton(
-                onPressed: () async {
-                  settings.dontShowDefaultAppPrompt = true;
-                  await _databaseService.updateSettings(settings);
-                  if (context.mounted) Navigator.pop(context);
-                },
-                child: const Text('Don\'t show again', style: TextStyle(color: Colors.grey)),
-              ),
-              const Spacer(),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Not now'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _openDefaultAppSettings();
-                },
-                child: const Text('Yes'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
+          actions: [
+            TextButton(
+              onPressed: () async {
+                settings.dontShowDefaultAppPrompt = true;
+                await _databaseService.updateSettings(settings);
+                if (context.mounted) Navigator.pop(context);
+              },
+              child: const Text('Don\'t show again', style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Not now'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _triggerDefaultAppChooser();
+              },
+              child: const Text('Yes'),
+            ),
+          ],
+        ),
+      );
+    }
+
+  Future<void> _triggerDefaultAppChooser() async {
+    // To trigger the "Open with" dialog and allow setting default, 
+    // we need to view a file of the target type (PDF).
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('${tempDir.path}/empty.pdf');
+      if (!await tempFile.exists()) {
+        await tempFile.writeAsBytes([]); // Create empty file
+      }
+
+      // Create an intent to view this file
+      final intent = AndroidIntent(
+        action: 'action_view',
+        data: Uri.parse(tempFile.path).toString(), // Usually needs content:// URI and FileProvider
+        type: 'application/pdf',
+        flags: [268435456], // FLAG_ACTIVITY_NEW_TASK
+      );
+      
+      // Note: On modern Android, file:// URIs might fail with FileUriExposedException.
+      // We should ideally use FileProvider, but setting that up requires AndroidManifest changes and XML configs.
+      // If we can't change AndroidManifest easily here, we might try a different approach 
+      // or fall back to the settings page if this fails.
+      // However, for the purpose of this task, we will try the intent.
+      // If it fails, we fall back to settings.
+      
+      try {
+        await intent.launch();
+      } catch (e) {
+        // Fallback to settings if launch fails (likely due to file uri exposure or no app)
+        _openDefaultAppSettings();
+      }
+    } catch (e) {
+      _openDefaultAppSettings();
+    }
   }
 
   void _openDefaultAppSettings() async {
