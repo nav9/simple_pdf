@@ -28,7 +28,10 @@
 * Provide an option to allow the user to jump to a specific page of the PDF.
 * Provide an option to open a modal containing checkboxes for each of the PDF pages, thumbnails of each page and allowing the user to select one or more pages (along with options of "Select all/none"). The user should be allowed to merge the selected pages and save it as a new PDF in the database (give it a default name based on the earlier name plus the date and time of merging).
 * An option to store the files in encrypted form in the database and to be able to export or import encrypted PDF's of this app.
-* An option to rename the PDF files stored in the database.
+* An option to delete and rename the PDF files stored in the database.
+* When displaying the list of PDF files in the database, show the newest added files first, and show the date and time of creation of the files and show the filesize too.
+* When the user switches to fullscreen mode, a floating button is shown to exit fullscreen mode. I want that button to be shown only for three seconds and then it should disappear. If the user double taps on the screen the button should re-appear for 3 seconds. The user can also press the physical back button of the phone to exit the fullscreen mode. Along with the exit fullscreen mode button, also display an overlay that shows the current page number and the total number of pages like `Page <current page number> / <total number of pages>`. Even this overlay should have the same disappearing behaviour as the exit fullscreen button. It should also have the same behaviour of appearing if the user double taps on the PDF.
+* Whether the user is viewing the PDF file in fullscreen mode or not, the user would have zoomed in to a certain zoom level. The app should remember the zoom level separately for portrait mode and for landscape mode. So if the user switches between portrait and landscape mode, the app should immediately zoom to the appropriate zoom value for that mode.
 
 # Text to speech
 1. use flutter_tts for reading out text, and provide all the controls that flutter_tts allows. Keep the architecture flexible in case the programmer wants to add more text to speech engines later.

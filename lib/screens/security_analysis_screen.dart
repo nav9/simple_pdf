@@ -48,110 +48,125 @@ class SecurityAnalysisScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            color: scanResult.isSafe ? Colors.green.shade100 : Colors.red.shade100,
-            child: Column(
-              children: [
-                Icon(
-                  scanResult.isSafe ? Icons.check_circle : Icons.warning,
-                  size: 64,
-                  color: scanResult.isSafe ? Colors.green : Colors.red,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  fileName,
-                  style: Theme.of(context).textTheme.titleLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  scanResult.summary,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
           Expanded(
-            child: scanResult.threats.isEmpty
-                ? Center(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    color: scanResult.isSafe ? Colors.green.shade100 : Colors.red.shade100,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.check_circle, size: 80, color: Colors.green),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No threats detected',
-                          style: Theme.of(context).textTheme.headlineSmall,
+                        Icon(
+                          scanResult.isSafe ? Icons.check_circle : Icons.warning,
+                          size: 64,
+                          color: scanResult.isSafe ? Colors.green.shade800 : Colors.red.shade900,
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'This PDF appears to be safe',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          fileName,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Colors.black87, // High contrast on light pastel background
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          scanResult.summary,
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.black87, // High contrast
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),
-                  )
-                : ListView.builder(
-                    itemCount: scanResult.threats.length,
-                    itemBuilder: (context, index) {
-                      final threat = scanResult.threats[index];
-                      return Card(
-                        margin: const EdgeInsets.all(8),
-                        child: ExpansionTile(
-                          leading: Icon(
-                            _getThreatIcon(threat.level),
-                            color: _getThreatColor(threat.level),
+                  ),
+                  if (scanResult.threats.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(32.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.check_circle, size: 80, color: Colors.green),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No threats detected',
+                            style: Theme.of(context).textTheme.headlineSmall,
                           ),
-                          title: Text(threat.type),
-                          subtitle: Text(
-                            threat.level.toString().split('.').last.toUpperCase(),
-                            style: TextStyle(
+                          const SizedBox(height: 8),
+                          Text(
+                            'This PDF appears to be safe',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: scanResult.threats.length,
+                      itemBuilder: (context, index) {
+                        final threat = scanResult.threats[index];
+                        return Card(
+                          margin: const EdgeInsets.all(8),
+                          child: ExpansionTile(
+                            leading: Icon(
+                              _getThreatIcon(threat.level),
                               color: _getThreatColor(threat.level),
-                              fontWeight: FontWeight.bold,
                             ),
-                          ),
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Description:',
-                                    style: Theme.of(context).textTheme.titleSmall,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(threat.description),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    'Recommendation:',
-                                    style: Theme.of(context).textTheme.titleSmall,
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(threat.recommendation),
-                                  if (threat.details.isNotEmpty) ...[
-                                    const SizedBox(height: 12),
+                            title: Text(threat.type),
+                            subtitle: Text(
+                              threat.level.toString().split('.').last.toUpperCase(),
+                              style: TextStyle(
+                                color: _getThreatColor(threat.level),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Text(
-                                      'Details:',
+                                      'Description:',
                                       style: Theme.of(context).textTheme.titleSmall,
                                     ),
                                     const SizedBox(height: 4),
-                                    ...threat.details.map((detail) => Padding(
-                                          padding: const EdgeInsets.only(left: 8, top: 2),
-                                          child: Text('• $detail'),
-                                        )),
+                                    Text(threat.description),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'Recommendation:',
+                                      style: Theme.of(context).textTheme.titleSmall,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(threat.recommendation),
+                                    if (threat.details.isNotEmpty) ...[
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        'Details:',
+                                        style: Theme.of(context).textTheme.titleSmall,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      ...threat.details.map((detail) => Padding(
+                                            padding: const EdgeInsets.only(left: 8, top: 2),
+                                            child: Text('• $detail'),
+                                          )),
+                                    ],
                                   ],
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            ),
           ),
           Container(
             padding: const EdgeInsets.all(16),
@@ -177,4 +192,4 @@ class SecurityAnalysisScreen extends StatelessWidget {
       ),
     );
   }
-}
+} // End of class

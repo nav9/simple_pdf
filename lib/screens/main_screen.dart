@@ -6,6 +6,8 @@ import 'package:pdfrx/pdfrx.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:android_intent_plus/android_intent.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../services/database_service.dart';
 import '../models/pdf_file_model.dart';
 import 'settings_screen.dart';
@@ -499,6 +501,8 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                     return PdfViewerWidget(
                       pdf: pdf,
                       controller: _controllers[pdf.id],
+                      isFullScreen: _isFullscreen,
+                      onExitFullscreen: _toggleFullscreen,
                     );
                   }).toList(),
                 ),
@@ -565,13 +569,36 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     );
   }
 
-  void _openDefaultAppSettings() {
-    // Best effort: Open Android settings for this app.
-    // In a real scenario we'd trigger an INTENT with a dummy file to force the picker.
-    // For now we assume the user knows how to set defaults if we send them to settings.
-    // Or we simply don't verify.
-    // Note: To use OpenAppSettings we need permission_handler or similar.
-    // Inspecting imports... permission_handler is imported in main_screen.dart.
-    openAppSettings(); 
+  void _openDefaultAppSettings() async {
+    // Open default app settings for this app or general default apps settings
+    // android.settings.MANAGE_DEFAULT_APPS_SETTINGS is available API 24+
+    // android.settings.APP_OPEN_BY_DEFAULT_SETTINGS is available API 31+
+    
+    // Get package name dynamically
+    final packageInfo = await PackageInfo.fromPlatform();
+    final packageName = packageInfo.packageName;
+    
+    // "android.settings.APP_OPEN_BY_DEFAULT_SETTINGS" with data "package:packageName"
+    // Available since API 31 (Android 12)
+    final intent = AndroidIntent(
+      action: 'android.settings.APP_OPEN_BY_DEFAULT_SETTINGS',
+      data: 'package:$packageName', 
+    );
+    
+    try {
+      await intent.launch();
+    } catch (e) {
+      // Fallback: Manage Default Apps Settings (generic list)
+      const fallbackIntent = AndroidIntent(
+        action: 'android.settings.MANAGE_DEFAULT_APPS_SETTINGS',
+      );
+      try {
+        await fallbackIntent.launch();
+      } catch (e) {
+        // Ultimate fallback: App Info Settings
+        // openAppSettings() from permission_handler opens generic app settings
+        openAppSettings();
+      }
+    }
   }
 }
