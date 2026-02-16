@@ -22,10 +22,30 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
   
   int _selectedTab = 0; // 0: Database, 1: Browse, 2: URL
   bool _isLoading = false;
+  int _dotCount = 0;
+  Timer? _loadingTimer;
+
+  void _startLoadingAnimation() {
+    _dotCount = 0;
+    _loadingTimer?.cancel();
+    _loadingTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (mounted) {
+        setState(() {
+          _dotCount = (_dotCount + 1) % 4;
+        });
+      }
+    });
+  }
+
+  void _stopLoadingAnimation() {
+    _loadingTimer?.cancel();
+    _loadingTimer = null;
+  }
 
   @override
   void dispose() {
     _urlController.dispose();
+    _stopLoadingAnimation();
     super.dispose();
   }
 
@@ -40,12 +60,14 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
         setState(() {
           _isLoading = true;
         });
+        _startLoadingAnimation();
         final filePath = result.files.single.path!;
         await _processPdfFile(filePath, result.files.single.name);
         if (mounted) {
           setState(() {
             _isLoading = false;
           });
+          _stopLoadingAnimation();
         }
       }
     } catch (e) {
@@ -53,6 +75,7 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
         setState(() {
           _isLoading = false;
         });
+        _stopLoadingAnimation();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error picking file: $e')),
         );
@@ -132,9 +155,12 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
           ),
           const SizedBox(height: 16),
           if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.only(bottom: 16.0),
-              child: LinearProgressIndicator(),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Text(
+                'Loading${'.' * _dotCount}',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
             ),
           Expanded(
             child: _buildTabContent(),

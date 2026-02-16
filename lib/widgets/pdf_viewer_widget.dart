@@ -31,6 +31,25 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
   String? _tempFilePath;
   bool _isLoading = true;
   String? _error;
+  int _dotCount = 0;
+  Timer? _loadingTimer;
+
+  void _startLoadingAnimation() {
+    _dotCount = 0;
+    _loadingTimer?.cancel();
+    _loadingTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      if (mounted) {
+        setState(() {
+          _dotCount = (_dotCount + 1) % 4;
+        });
+      }
+    });
+  }
+
+  void _stopLoadingAnimation() {
+    _loadingTimer?.cancel();
+    _loadingTimer = null;
+  }
   
   // Fullscreen & Controls State
   bool _showControls = false;
@@ -48,6 +67,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
   void initState() {
     super.initState();
     _internalController = widget.controller ?? PdfViewerController();
+    _startLoadingAnimation();
     _loadPdf();
   }
 
@@ -154,6 +174,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           _tempFilePath = tempPath;
           _isLoading = false;
         });
+        _stopLoadingAnimation();
       }
     } catch (e) {
       if (mounted) {
@@ -161,6 +182,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
           _error = 'Error loading PDF: $e';
           _isLoading = false;
         });
+        _stopLoadingAnimation();
       }
     }
   }
@@ -168,8 +190,11 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
+      return Center(
+        child: Text(
+          'Loading${'.' * _dotCount}',
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
       );
     }
 
@@ -366,6 +391,7 @@ class _PdfViewerWidgetState extends State<PdfViewerWidget> {
   @override
   void dispose() {
     _controlsTimer?.cancel();
+    _stopLoadingAnimation();
     _saveCurrentZoom(); // Save on dispose? Maybe not needed if we only care about orientation switch during view.
     // _internalController.dispose(); // Do not dispose if passed from outside? 
     // Widget receives controller, so we don't own it presumably if passed.
