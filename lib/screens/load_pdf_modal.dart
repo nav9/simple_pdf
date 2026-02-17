@@ -222,12 +222,12 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
     }
   }
 
-  Future<void> _deletePdf(PdfFileModel pdf) async {
+  Future<void> _moveToTrash(PdfFileModel pdf) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete PDF'),
-        content: Text('Are you sure you want to delete "${pdf.name}"?'),
+        title: const Text('Move to Trash'),
+        content: Text('Are you sure you want to move "${pdf.name}" to trash?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -235,16 +235,21 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            style: TextButton.styleFrom(foregroundColor: Colors.orange),
+            child: const Text('Move to Trash'),
           ),
         ],
       ),
     );
 
     if (confirm == true) {
-      await _databaseService.deletePdf(pdf.id);
+      await _databaseService.movePdfToTrash(pdf.id);
       setState(() {});
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('"${pdf.name}" moved to trash')),
+        );
+      }
     }
   }
 
@@ -274,8 +279,8 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
             onSelected: (value) {
               if (value == 'rename') {
                 _renamePdf(pdf);
-              } else if (value == 'delete') {
-                _deletePdf(pdf);
+              } else if (value == 'trash') {
+                _moveToTrash(pdf);
               }
             },
             itemBuilder: (context) => [
@@ -290,12 +295,12 @@ class _LoadPdfModalState extends State<LoadPdfModal> {
                 ),
               ),
               const PopupMenuItem(
-                value: 'delete',
+                value: 'trash',
                 child: Row(
                   children: [
-                    Icon(Icons.delete, color: Colors.red),
+                    Icon(Icons.delete_outline, color: Colors.orange),
                     SizedBox(width: 8),
-                    Text('Delete'),
+                    Text('Move to Trash'),
                   ],
                 ),
               ),

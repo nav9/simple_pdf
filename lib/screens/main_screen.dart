@@ -161,6 +161,33 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     final pdf = _currentPdf;
     if (pdf == null) return;
     
+    // Check and request storage permission
+    var status = await Permission.storage.status;
+    if (status.isDenied) {
+      status = await Permission.storage.request();
+    }
+
+    if (status.isPermanentlyDenied) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Storage permission is permanently denied. Please enable it in settings.'),
+            duration: Duration(seconds: 4),
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!status.isGranted) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Storage permission is required to save PDF')),
+        );
+      }
+      return;
+    }
+
     // In a real app with encrypted storage, we'd need to decrypt to a temp file first
     // then copy it. Since PdfViewerWidget loads it to a temp path, 
     // we might need access to that or ask logic to export.
@@ -171,11 +198,30 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     if (outputDir == null) return;
 
     final String newPath = '$outputDir/${pdf.name}';
-    // Logic to copy file would go here.
-    // For this example, we'll just show a success message as we lack the full file access logic in this snippet.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Saved to $newPath (simulated)')),
-    );
+    
+    try {
+      final sourceFile = File(pdf.filePath);
+      if (await sourceFile.exists()) {
+        await sourceFile.copy(newPath);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Saved to $newPath')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Source PDF file not found in sandbox')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save PDF: $e')),
+        );
+      }
+    }
   }
 
   void _toggleDarkBackground() async {
@@ -365,6 +411,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
             )
           else ...[
             IconButton(
+              icon: Icon(_isFullscreen ? Icons.fullscreen_exit : Icons.fullscreen),
+              tooltip: _isFullscreen ? 'Exit Fullscreen' : 'Fullscreen',
+              onPressed: _toggleFullscreen,
+            ),
+            IconButton(
               icon: const Icon(Icons.folder_open),
               tooltip: 'Load PDF',
               onPressed: _showLoadPdfModal,
@@ -379,7 +430,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                   case 'extract': _extractContent(); break;
                   case 'bookmark': _showBookmarks(); break;
                   case 'jump_to_page': _jumpToPage(); break;
-                  case 'fullscreen': _toggleFullscreen(); break;
                   case 'select_pages': _selectPages(); break;
                   case 'rename': _renamePdf(); break;
                 }
@@ -392,7 +442,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 const PopupMenuItem(value: 'extract', child: ListTile(leading: Icon(Icons.content_copy), title: Text('Extract Content'))),
                 const PopupMenuItem(value: 'bookmark', child: ListTile(leading: Icon(Icons.bookmark), title: Text('Bookmarks'))),
                 const PopupMenuItem(value: 'jump_to_page', child: ListTile(leading: Icon(Icons.pageview), title: Text('Jump to Page'))),
-                const PopupMenuItem(value: 'fullscreen', child: ListTile(leading: Icon(Icons.fullscreen), title: Text('Fullscreen'))),
                 const PopupMenuItem(value: 'select_pages', child: ListTile(leading: Icon(Icons.select_all), title: Text('Select Pages'))),
                 const PopupMenuItem(value: 'rename', child: ListTile(leading: Icon(Icons.edit), title: Text('Rename'))),
               ],
